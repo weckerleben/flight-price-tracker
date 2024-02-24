@@ -12,7 +12,7 @@ configure_logging()
 
 def get_service():
     creds = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
-    service = build('sheets', 'v4', credentials=creds)
+    service = build('sheets', 'v4', credentials=creds, cache_discovery=False)
     return service
 
 
@@ -43,22 +43,32 @@ def read_value_from_sheet(cell_range):
         print('No data found.')
         return None
     else:
-        return values[0][0]  # Devuelve el valor de la celda C1
+        return values[0][0]
 
 
-def compare_and_update_sheet(departure_date, return_date, scraped_price, duration, URL):
-    current_price_str = read_value_from_sheet('Kayak!C1')
+def compare_and_update_sheet(departure_date, return_date, days, scraped_price, duration, URL):
+    current_price_str = read_value_from_sheet('Kayak!E1') if read_value_from_sheet('Kayak!E1') is not None else '9999'
+    current_price_per_day_str = read_value_from_sheet('Kayak!F2') if read_value_from_sheet('Kayak!F2') is not None else '9999'
     try:
-        # Intenta convertir el precio leído a un número flotante para la comparación
-        current_price = float(current_price_str)
-        scraped_price_float = float(scraped_price)
+        if scraped_price is not None:
+            current_price = float(current_price_str)
+            scraped_price_float = float(scraped_price)
+            current_price_per_day = float(current_price_per_day_str.replace(',', '.'))
+            price_per_day = round(scraped_price_float / days, 2)
 
-        # Si el precio obtenido del scraping es menor, actualiza la hoja
-        if scraped_price_float < current_price and scraped_price != 0:
-            logging.info(f"Nuevo precio menor encontrado: {scraped_price_float}. Actualizando hoja...")
-            values = [[departure_date, return_date, scraped_price, duration, URL,
-                       datetime.now().strftime("%d/%m/%Y %H:%M:%S")]]
-            update_data_in_sheet('Kayak!A1', values)  # Asume que quieres sobrescribir desde A1
-    except ValueError:
-        logging.error(
-            f"Error al convertir precios para comparación. Precio actual: {current_price_str}, Precio de scraping: {scraped_price}")
+            if scraped_price_float < current_price:
+                logging.info(f"New lowest new price found: {scraped_price_float}. Updating sheet...")
+                values = [
+                    [datetime.now().strftime("%d/%m/%Y %H:%M:%S"), departure_date, return_date, days, scraped_price,
+                     price_per_day, duration, URL]]
+                update_data_in_sheet('Kayak!A1', values)
+
+            if price_per_day < current_price_per_day and price_per_day is not None:
+                logging.info(
+                    f"New lowest new price per day found: {price_per_day}, before {current_price_per_day}. Updating sheet...")
+                values = [
+                    [datetime.now().strftime("%d/%m/%Y %H:%M:%S"), departure_date, return_date, days, scraped_price,
+                     price_per_day, duration, URL]]
+                update_data_in_sheet('Kayak!A2', values)
+    except:
+        pass
