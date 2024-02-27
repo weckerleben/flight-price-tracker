@@ -1,4 +1,4 @@
-## Code of Conduct for Taxpayers
+## Code of Conduct for Contributors
 
 ## Our Commitment
 
