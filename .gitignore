@@ -1,8 +1,10 @@
 *.log
 *.json
 *.csv
+*.pyc
 .idea
 app/__pycache__
-data/postgres
+data
 venv
 .env
+logs
