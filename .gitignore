@@ -3,3 +3,4 @@
 *.csv
 .idea
 src/__pycache__
+data/postgres
