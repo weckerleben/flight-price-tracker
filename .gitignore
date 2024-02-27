@@ -2,5 +2,7 @@
 *.json
 *.csv
 .idea
-src/__pycache__
+app/__pycache__
 data/postgres
+venv
+.env
