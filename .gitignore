@@ -1,10 +1,21 @@
-*.log
-*.json
-*.csv
-*.pyc
-.idea
-app/__pycache__
-data
-venv
+# Virtual environment
+venv/
+
+# Environment configuration files
 .env
-logs
+
+# Python compiled files
+*.pyc
+__pycache__/
+
+# Data files
+*.csv
+*.log
+data/
+logs/
+
+# resource and configuration files
+*.json
+
+# IDE configurations
+.idea/
